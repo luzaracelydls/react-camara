@@ -17,7 +17,7 @@ Guía paso a paso para crear una aplicación **React Native / Expo** con un bot�
 
 ## Paso 1 — Crear un nuevo proyecto con el template en blanco
 
-Abre una terminal y ejecuta el siguiente comando. Cuando se te pida elegir una plantilla, selecciona **"Blank"**.
+Abre una terminal y ejecuta el siguiente comando. Cuando se te pida elegir una plantilla, selecciona **"Blank"** (plantilla en blanco).
 
 ```bash
 npx create-expo-app react-camara
@@ -165,7 +165,7 @@ npx expo start
 
 Verás en la terminal un **código QR**. Sigue estos pasos según tu dispositivo:
 
-- **Android**: Abre la app **Expo GO** y toca **"Scan QR code"**. Apunta la cámara al código QR de la terminal.
+- **Android**: Abre la app **Expo GO** y toca **"Scan QR code"** (Escanear código QR). Apunta la cámara al código QR que aparece en la terminal.
 - **iOS**: Abre la app de **Cámara** nativa y apunta al código QR. Toca la notificación que aparece para abrir **Expo GO**.
 
 La aplicación se cargará en tu dispositivo. Al iniciarse, te pedirá permiso para acceder a la cámara. Concédelo para ver el preview y el botón **"Voltear cámara"**.
