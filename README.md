@@ -50,13 +50,15 @@ npx expo install expo-camera
 Abre el archivo `App.js` que está en la raíz del proyecto y reemplaza todo su contenido con el siguiente código:
 
 ```jsx
-import { useState } from 'react';
-import { Button, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useRef, useState } from 'react';
+import { Button, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 
 export default function App() {
   const [facing, setFacing] = useState('back');
   const [permission, requestPermission] = useCameraPermissions();
+  const [photoUri, setPhotoUri] = useState(null);
+  const cameraRef = useRef(null);
 
   // Mientras los permisos no se han resuelto, no mostramos nada
   if (!permission) {
@@ -80,12 +82,35 @@ export default function App() {
     setFacing((current) => (current === 'back' ? 'front' : 'back'));
   }
 
+  // Captura una foto y guarda su URI en el estado
+  async function takePicture() {
+    if (cameraRef.current) {
+      const photo = await cameraRef.current.takePictureAsync();
+      setPhotoUri(photo.uri);
+    }
+  }
+
+  // Si ya se tomó una foto, la muestra con opción de volver a la cámara
+  if (photoUri) {
+    return (
+      <View style={styles.container}>
+        <Image source={{ uri: photoUri }} style={styles.preview} />
+        <TouchableOpacity style={styles.retakeButton} onPress={() => setPhotoUri(null)}>
+          <Text style={styles.text}>Tomar otra foto</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      <CameraView style={styles.camera} facing={facing}>
+      <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
             <Text style={styles.text}>Voltear cámara</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.captureButton} onPress={takePicture}>
+            <View style={styles.captureInner} />
           </TouchableOpacity>
         </View>
       </CameraView>
@@ -110,16 +135,42 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: 'transparent',
     margin: 64,
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
   },
   button: {
-    flex: 1,
     alignSelf: 'flex-end',
     alignItems: 'center',
+  },
+  captureButton: {
+    alignSelf: 'flex-end',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    borderWidth: 4,
+    borderColor: 'white',
+    backgroundColor: 'transparent',
+  },
+  captureInner: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: 'white',
   },
   text: {
     fontSize: 24,
     fontWeight: 'bold',
     color: 'white',
+  },
+  preview: {
+    flex: 1,
+  },
+  retakeButton: {
+    padding: 16,
+    alignItems: 'center',
+    backgroundColor: '#000',
   },
 });
 ```
@@ -132,6 +183,10 @@ const styles = StyleSheet.create({
 | `CameraView` | Componente que muestra el preview en vivo de la cámara. |
 | `facing` | Estado que controla si se usa la cámara trasera (`'back'`) o frontal (`'front'`). |
 | `toggleCameraFacing` | Función que alterna entre las dos cámaras al pulsar el botón. |
+| `cameraRef` | Referencia a `CameraView` necesaria para llamar a `takePictureAsync()`. |
+| `takePicture` | Función asíncrona que llama a `cameraRef.current.takePictureAsync()` y guarda la URI de la foto capturada. |
+| `photoUri` | Estado que almacena la URI de la foto tomada. Cuando tiene valor, se muestra la imagen en lugar del preview. |
+| Botón circular | Botón visual que llama a `takePicture` al pulsarlo, con un anillo blanco y relleno interior característicos de los botones de cámara. |
 
 ---
 
@@ -192,6 +247,8 @@ react-camara/
 | `expo-camera` no se reconoce | Ejecuta `npx expo install expo-camera` nuevamente y reinicia el servidor. |
 | El QR no carga en Expo GO | Verifica que el dispositivo y la computadora estén en la misma red Wi-Fi. |
 | Error "SDK version mismatch" | Actualiza Expo GO a la última versión desde la tienda de apps. |
+| El botón de captura no hace nada | Verifica que la prop `ref={cameraRef}` esté en el componente `<CameraView>` y que `cameraRef` se haya creado con `useRef(null)`. |
+| La foto no se muestra después de capturar | Comprueba que `photo.uri` tenga valor en la consola de Metro. Algunos emuladores requieren permisos adicionales de almacenamiento. |
 
 ---
 
